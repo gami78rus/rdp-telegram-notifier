@@ -1,61 +1,97 @@
-# RDP Monitoring to Telegram
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                        🛡️  МОНИТОРИНГ БЕЗОПАСНОСТИ RDP                        ║
+║                  📨 ОТПРАВКА УВЕДОМЛЕНИЙ В TELEGRAM                          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-This repository contains a PowerShell script to monitor RDP login/reconnect events on Windows machines and send detailed notifications to a Telegram chat or group.
+📌 РЕПОЗИТОРИЙ СОДЕРЖИТ PowerShell-скрипт для мониторинга событий входа и 
+   переподключения по RDP на компьютерах Windows и отправки детализированных 
+   уведомлений в Telegram.
 
-## Features
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 ОСНОВНЫЕ ВОЗМОЖНОСТИ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+•  📊 Мониторинг событий входа (Event ID 21) и переподключения (Event ID 25) RDP
+•  📨 Отправка детальных уведомлений в указанный чат/группу Telegram
+•  📋 В уведомлениях включается:
+   ├─ Полное доменное имя (FQDN) хоста
+   ├─ Все IPv4-адреса машины
+   ├─ Имя учетной записи пользователя
+   ├─ IP-адрес источника подключения клиента
+   ├─ DNS-имя клиентского IP (если разрешается)
+   ├─ Тип события (Вход/Переподключение)
+   ├─ ID события
+   ├─ Временная метка
+   └─ Полное сообщение события
+•  ⚙️  Автоматическая установка в качестве запланированной задачи при загрузке системы
+•  📦 Все компоненты в одном скрипте PowerShell для простого развертывания
 
-*   Monitors RDP logon (Event ID 21) and reconnect (Event ID 25) events.
-*   Sends detailed notifications to a specified Telegram chat/group.
-*   Notifications include:
-    *   **Host FQDN:** Full Qualified Domain Name of the machine where the RDP session occurred.
-    *   **Host IPs:** All IPv4 addresses of the host machine.
-    *   **Logged-in User:** The user account that initiated the RDP session.
-    *   **Client Source IP:** The IP address from which the client connected.
-    *   **Client Source DNS:** The resolved DNS name of the client's source IP (if available).
-    *   Event type (Logon/Reconnect).
-    *   Event ID.
-    *   Timestamp.
-    *   Full event message.
-*   Installs itself as a scheduled task to run at system logon.
-*   Self-contained in a single PowerShell script for easy deployment.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 ИНСТРУКЦИЯ ПО РАЗВЕРТЫВАНИЮ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔹 ШАГ 1: ПОЛУЧЕНИЕ ТОКЕНА TELEGRAM БОТА
+     1. Напишите @BotFather в Telegram
+     2. Отправьте команду /newbot
+     3. Следуйте инструкциям, выберите имя и username для бота
+     4. Сохраните полученный API-токен (например, 123456789:ABC-DEF1234ghy)
 
-## How to Use
+🔹 ШАГ 2: ПОЛУЧЕНИЕ ID ЧАТА
+     • Для личного чата: отправьте любое сообщение боту, затем перешлите 
+       это сообщение @RawDataBot или @myidbot
+     • Для группового чата: добавьте бота в группу, отправьте сообщение,
+       затем добавьте @RawDataBot или @myidbot в ту же группу
 
-1.  **Get your Telegram Bot Token:**
-    *   Talk to [@BotFather](https://t.me/BotFather) on Telegram.
-    *   Send `/newbot` to create a new bot.
-    *   Follow the instructions, choose a name and a username for your bot.
-    *   BotFather will give you an API token (e.g., `123456789:ABC-DEF1234ghy`). Keep this token secure.
+🔹 ШАГ 3: НАСТРОЙКА СКРИПТА
+     Откройте файл install-monitoring.template.ps1 и найдите строки:
 
-2.  **Get your Telegram Chat ID:**
-    *   **For a private chat:** Send any message to your new bot. Then, talk to [@RawDataBot](https://t.me/RawDataBot) or [@myidbot](https://t.me/myidbot) and forward a message from your bot to it. It will show you the chat ID.
-    *   **For a group chat:** Add your new bot to a group. Send any message to the group. Then, add [@RawDataBot](https://t.me/RawDataBot) or [@myidbot](https://t.me/myidbot) to the *same group* and it will display the group's chat ID (it will be a negative number, e.g., `-123456789`).
+     ┌─────────────────────────────────────────────────────────┐
+     │ $BotToken = "ВАШ_ТЕЛЕГРАМ_БОТ_ТОКЕН"                    │
+     │ $ChatID = "ВАШ_ID_ЧАТА_ИЛИ_ГРУППЫ"                      │
+     └─────────────────────────────────────────────────────────┘
 
-3.  **Edit the Script (`install-monitoring.template.ps1`):**
-    *   Open the `install-monitoring.template.ps1` file in a text editor (like Notepad or VS Code).
-    *   Find the following lines within the script:
-        ```powershell
-        $BotToken = "ВАШ_ТЕЛЕГРАМ_БОТ_ТОКЕН"
-        $ChatID = "ВАШ_ID_ЧАТА_ИЛИ_ГРУППЫ"
-        ```
-    *   Replace `"ВАШ_ТЕЛЕГРАМ_БОТ_ТОКЕН"` with the actual Bot Token you obtained from BotFather.
-    *   Replace `"ВАШ_ID_ЧАТА_ИЛИ_ГРУППЫ"` with your actual Chat ID.
+     Замените значения на ваши реальные данные.
 
-4.  **Run the Script on Target Machines:**
-    *   Copy the modified `install-monitoring.template.ps1` script to each Windows machine where you want to monitor RDP connections.
-    *   On the target machine, simply run the script (e.g., by double-clicking it or from a PowerShell prompt). **The script will automatically request Administrator privileges if needed.**
-    *   Navigate to the directory where you copied the script.
-    *   Run the script using the following command:
-        ```powershell
-        powershell.exe -ExecutionPolicy Bypass -File .\install-monitoring.template.ps1
-        ```
-    *   The script sets the console output encoding to UTF-8 to ensure proper display of all characters.
-    *   The script will create the necessary files (`monitor-rdp.ps1`, `send-telegram.ps1`, `log.txt`) in `C:\ProgramData\TelegramNotifications` and set up a scheduled task named `TelegramRDPAlert` to run `monitor-rdp.ps1` at system logon.
+🔹 ШАГ 4: ЗАПУСК НА ЦЕЛЕВЫХ МАШИНАХ
+     Скопируйте модифицированный скрипт на каждый компьютер Windows.
+     Запустите от имени администратора:
 
-## How it Works
+     ┌─────────────────────────────────────────────────────────┐
+     │ powershell.exe -ExecutionPolicy Bypass -File            │
+     │ .\install-monitoring.template.ps1                       │
+     └─────────────────────────────────────────────────────────┘
 
-The main script (`install-monitoring.template.ps1`) embeds two helper scripts:
-*   `monitor-rdp.ps1`: This script actively monitors the Windows Security event log for RDP logon (Event ID 21) and reconnect (Event ID 25) events. It extracts relevant information like username, source IP, and host details.
-*   `send-telegram.ps1`: This script takes a message as input and uses the Telegram Bot API (`Invoke-RestMethod`) to send the message to the configured chat ID.
+     Скрипт автоматически:
+     • Создаст необходимые файлы в C:\ProgramData\TelegramNotifications
+     • Установит запланированную задачу TelegramRDPAlert
+     • Настроит мониторинг при каждом входе в систему
 
-The `monitor-rdp.ps1` script is configured to run as a scheduled task at every system logon, ensuring continuous monitoring. It also includes logging to `C:\ProgramData\TelegramNotifications\log.txt` for troubleshooting.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 АРХИТЕКТУРА РЕШЕНИЯ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📁 Основной скрипт включает два вспомогательных:
+
+1. monitor-rdp.ps1
+   ├─ Мониторит журнал событий Windows Security
+   ├─ Фильтрует события RDP (ID 21, 25)
+   ├─ Извлекает: пользователя, IP источника, данные хоста
+   └─ Логирует в C:\ProgramData\TelegramNotifications\log.txt
+
+2. send-telegram.ps1
+   └─ Отправляет сообщения через Telegram Bot API 
+      с использованием Invoke-RestMethod
+
+📅 Запланированная задача обеспечивает постоянный мониторинг 
+   при каждой загрузке системы.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  ДЛЯ ОБЪЕКТОВ КИИ И СООТВЕТСТВИЯ ТРЕБОВАНИЯМ 152-ФЗ/187-ФЗ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+•  Решение помогает выполнять требования по мониторингу и регистрации 
+   событий информационной безопасности
+•  Обеспечивает оперативное оповещение о несанкционированных 
+   подключениях к удаленным рабочим столам
+•  Может быть интегрировано с отечественными SIEM-системами
+•  Позволяет документировать инциденты для последующего расследования
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                   [🔐] КИБЕРБЕЗОПАСНОСТЬ НАЧИНАЕТСЯ С МОНИТОРИНГА             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
